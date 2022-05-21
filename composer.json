@@ -1,0 +1,21 @@
+{
+    "name": "hexlet/code",
+    "description": "gendiff",
+    "type": "project",
+    "license": "proprietary",
+    "autoload": {
+        "psr-4": {
+            "Hexlet\\Code\\": "src/",
+            "Bin\\": "bin/"
+        }
+    },
+    "authors": [
+        {
+            "name": "ivan.elantyev",
+            "email": "ivan.elantyev@yandex.ru"
+        }
+    ],
+    "require": {
+        "docopt/docopt": "^1.0"
+    }
+}
