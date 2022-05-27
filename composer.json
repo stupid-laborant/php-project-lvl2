@@ -5,9 +5,11 @@
     "license": "proprietary",
     "autoload": {
         "psr-4": {
-            "Hexlet\\Code\\": "src/",
-            "Bin\\": "bin/"
-        }
+            "Hexlet\\Code\\": "src/"
+        },
+        "files": [
+            "src/GenDiff.php"
+        ]
     },
     "authors": [
         {
@@ -18,7 +20,12 @@
     "require": {
         "docopt/docopt": "^1.0"
     },
+    "bin":
+    [
+        "bin/gendiff"
+    ],
     "require-dev": {
-        "squizlabs/php_codesniffer": "^3.6"
+        "squizlabs/php_codesniffer": "^3.6",
+        "phpunit/phpunit": "^9.5"
     }
 }

@@ -1,11 +1,14 @@
 #!/usr/bin/env php
 <?php
 
-require_once __DIR__ . "/../vendor/autoload.php";
+$autoloadPath1 = __DIR__ . '/../../../autoload.php';
+$autoloadPath2 = __DIR__ . '/../vendor/autoload.php';
 
-const NEW_LINE_PREFIX = "+ ";
-const DEL_LINE_PREFIX = "- ";
-const UNCH_LINE_PREFIX = "  ";
+if (file_exists($autoloadPath1)) {
+    require_once $autoloadPath1;
+} else {
+    require_once $autoloadPath2;
+}
 
 $doc = <<<DOC
 
@@ -28,40 +31,3 @@ $args = Docopt::handle($doc, array('version' => 'Generate diff 1.0'));
 $firstFile = realpath($args["<firstFile>"]);
 $secondFile = realpath($args["<secondFile>"]);
 echo genDiff($firstFile, $secondFile);
-
-
-
-
-function genDiff(string $pathToFile1, string $pathToFile2): string
-{
-    $firstJson = json_decode(file_get_contents($pathToFile1), true);
-    $secondJson = json_decode(file_get_contents($pathToFile2), true);
-    ksort($firstJson);
-    ksort($secondJson);
-    $output = "{";
-    $modified = array_diff_assoc($secondJson, $firstJson);
-    $deleted = array_diff_assoc($firstJson, $secondJson);
-    foreach ($firstJson as $key => $value) {
-        $currentRecord = getProperString($key, $value);
-        if (array_key_exists($key, $modified)) {
-            $newRecord = getProperString($key, $secondJson[$key], NEW_LINE_PREFIX);
-            unset($modified[$key]);
-            $currentRecord = DEL_LINE_PREFIX . $currentRecord . PHP_EOL . $newRecord;
-        } elseif (array_key_exists($key, $deleted)) {
-            $currentRecord = DEL_LINE_PREFIX . $currentRecord;
-        } else {
-            $currentRecord = UNCH_LINE_PREFIX . $currentRecord;
-        }
-        $output .= PHP_EOL . $currentRecord;
-    }
-    foreach ($modified as $key => $value) {
-        $newRecord = getProperString($key, $value, NEW_LINE_PREFIX);
-        $output .= PHP_EOL . $newRecord;
-    }
-    return $output . PHP_EOL . "}";
-}
-
-function getProperString(string $key, $value, string $prefix = ""): string
-{
-    return "{$prefix}{$key}: " . var_export($value, true);
-}
