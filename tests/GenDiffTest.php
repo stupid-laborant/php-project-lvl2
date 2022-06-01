@@ -17,11 +17,11 @@ class GenDiffTest extends TestCase
 
     public function setUp(): void
     {
-        $this->validJsonFile1 = "mock/file1.json";
-        $this->validJsonFile2 = "mock/file2.json";
-        $this->emptyFile = "mock/empty.json";
-        $this->validJsonFileAbsolut = __DIR__ . "/mock/file2.json";
-        $this->invalidJsonFile = "mock/invalid.json";
+        $this->validJsonFile1 = __DIR__ . "/mock/file1.json";
+        $this->validJsonFile2 = __DIR__ . "/mock/file2.json";
+        $this->emptyFile = __DIR__ . "/mock/empty.json";
+        $this->validJsonFileAbsolut = "tests/mock/file2.json";
+        $this->invalidJsonFile = __DIR__ . "/mock/invalid.json";
         $this->expectedResult = <<<DOC
 {
   - follow: false

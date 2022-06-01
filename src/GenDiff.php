@@ -6,8 +6,8 @@ const UNCH_LINE_PREFIX = "    ";
 
 function genDiff(string $pathToFile1, string $pathToFile2): string
 {
-    $firstJson = json_decode(file_get_contents($pathToFile1), true);
-    $secondJson = json_decode(file_get_contents($pathToFile2), true);
+    $firstJson = json_decode(file_get_contents(realpath($pathToFile1)), true);
+    $secondJson = json_decode(file_get_contents(realpath($pathToFile2)), true);
     ksort($firstJson);
     ksort($secondJson);
     $output = "{";
