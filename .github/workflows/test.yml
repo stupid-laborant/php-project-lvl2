@@ -19,5 +19,11 @@ jobs:
         run: make install
       - name: lnit
         run: make lint
-      - name: test
-        run: make test
+      - name: Run test & publish code coverage
+        uses: paambaati/codeclimate-action@v2.6.0
+        env:
+          CC_TEST_REPORTER_ID: 19dae8214c5a74c2601def97ece23366fd86f07bc2df8afcb1eadc49a74dd4bf
+        with:
+          coverageCommand: make test-coverage
+          coverageLocations: ${{github.workplace}}/build/logs/clover.xml:clover
+          debug: true

@@ -3,6 +3,9 @@
     "description": "gendiff",
     "type": "project",
     "license": "proprietary",
+    "scripts": {
+        "test": "phpunit tests"
+    },
     "autoload": {
         "psr-4": {
             "Hexlet\\Code\\": "src/"
