@@ -11,7 +11,8 @@
             "Hexlet\\Code\\": "src/"
         },
         "files": [
-            "src/GenDiff.php"
+            "src/GenDiff.php",
+            "src/Parsers/Parser.php"
         ]
     },
     "authors": [
@@ -21,7 +22,8 @@
         }
     ],
     "require": {
-        "docopt/docopt": "^1.0"
+        "docopt/docopt": "^1.0",
+        "symfony/yaml": "^6.1"
     },
     "bin":
     [

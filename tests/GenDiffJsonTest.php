@@ -4,9 +4,16 @@ namespace Hexlet\Code\GenDiff\Test;
 
 use PHPUnit\Framework\TestCase;
 
-require_once __DIR__ . '/../vendor/autoload.php';
+$autoloadPath1 = __DIR__ . '/../../../autoload.php';
+$autoloadPath2 = __DIR__ . '/../vendor/autoload.php';
 
-class GenDiffTest extends TestCase
+if (file_exists($autoloadPath1)) {
+    require_once $autoloadPath1;
+} else {
+    require_once $autoloadPath2;
+}
+
+class GenDiffJsonTest extends TestCase
 {
     private string $validJsonFile1;
     private string $validJsonFile2;
@@ -39,7 +46,7 @@ DOC;
         $this->assertEquals($this->expectedResult, genDiff($this->validJsonFile1, $this->validJsonFile2));
     }
 
-    public function testTwoJsonAbsolutPath()
+    public function testTwoJsonRelativePath()
     {
         $this->assertEquals($this->expectedResult, genDiff($this->validJsonFile1, $this->validJsonFileAbsolut));
     }

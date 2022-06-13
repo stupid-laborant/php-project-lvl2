@@ -1,13 +1,15 @@
 <?php
 
+use function Parser\parse;
+
 const NEW_LINE_PREFIX = "  + ";
 const DEL_LINE_PREFIX = "  - ";
 const UNCH_LINE_PREFIX = "    ";
 
 function genDiff(string $pathToFile1, string $pathToFile2): string
 {
-    $firstJson = json_decode(file_get_contents(realpath($pathToFile1)), true);
-    $secondJson = json_decode(file_get_contents(realpath($pathToFile2)), true);
+    $firstJson = parse($pathToFile1);
+    $secondJson = parse($pathToFile2);
     ksort($firstJson);
     ksort($secondJson);
     $output = "{";

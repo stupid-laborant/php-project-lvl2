@@ -1,5 +1,7 @@
 [![asciicast](https://asciinema.org/a/bwGOxklYPyqhMm0aW344NJGv3.svg)](https://asciinema.org/a/bwGOxklYPyqhMm0aW344NJGv3)
 ---
+[![asciicast](https://asciinema.org/a/I8wxCcy2RbP6Z7vfbtfjvvRUE.svg)](https://asciinema.org/a/I8wxCcy2RbP6Z7vfbtfjvvRUE)
+---
 ### Hexlet tests and other badges:
 [![Actions Status](https://github.com/stupid-laborant/php-project-lvl2/workflows/hexlet-check/badge.svg)](https://github.com/stupid-laborant/php-project-lvl2/actions)
 [![test](https://github.com/stupid-laborant/php-project-lvl2/actions/workflows/test.yml/badge.svg)](https://github.com/stupid-laborant/php-project-lvl2/actions/workflows/test.yml)
