@@ -12,30 +12,31 @@ function genDiff(string $pathToFile1, string $pathToFile2): string
     $secondJson = parse($pathToFile2);
     ksort($firstJson);
     ksort($secondJson);
-    $output = "{";
-    $modified = array_diff_assoc($secondJson, $firstJson);
-    $deleted = array_diff_assoc($firstJson, $secondJson);
+    $output = "{" . PHP_EOL;
+
+    $unmodified = array_intersect_assoc($firstJson, $secondJson);
+    $modified = array_diff_assoc(array_intersect_key($firstJson, $secondJson), $unmodified);
+    $added = array_diff_key($secondJson, $firstJson);
     foreach ($firstJson as $key => $value) {
-        $currentRecord = getProperString($key, $value);
-        if (array_key_exists($key, $modified)) {
-            $newRecord = getProperString($key, $secondJson[$key], NEW_LINE_PREFIX);
-            unset($modified[$key]);
-            $currentRecord = DEL_LINE_PREFIX . $currentRecord . PHP_EOL . $newRecord;
-        } elseif (array_key_exists($key, $deleted)) {
-            $currentRecord = DEL_LINE_PREFIX . $currentRecord;
+        if (array_key_exists($key, $unmodified)) {
+            $output .= getProperString($key, $value, UNCH_LINE_PREFIX);
         } else {
-            $currentRecord = UNCH_LINE_PREFIX . $currentRecord;
+            $output .= getProperString($key, $value, DEL_LINE_PREFIX);
+            if (array_key_exists($key, $modified)) {
+                $output .= getProperString($key, $secondJson[$key], NEW_LINE_PREFIX);
+            }
         }
-        $output .= PHP_EOL . $currentRecord;
     }
-    foreach ($modified as $key => $value) {
-        $newRecord = getProperString($key, $value, NEW_LINE_PREFIX);
-        $output .= PHP_EOL . $newRecord;
+
+    foreach ($added as $key => $value) {
+        $output .= getProperString($key, $value, NEW_LINE_PREFIX);
     }
-    return $output . PHP_EOL . "}";
+
+    return $output . "}";
 }
 
 function getProperString(string $key, $value, string $prefix = ""): string
 {
-    return is_bool($value) ? "{$prefix}{$key}: " . var_export($value, true) : "{$prefix}{$key}: {$value}";
+    $output = is_bool($value) ? "{$prefix}{$key}: " . var_export($value, true) : "{$prefix}{$key}: {$value}";
+    return $output . PHP_EOL;
 }
