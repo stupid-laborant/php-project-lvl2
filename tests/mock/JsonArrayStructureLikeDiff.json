@@ -1,0 +1,8 @@
+{
+  "doesnt": "matter",
+  "key": {
+    "new_value": "value2",
+    "old_value": "value1",
+    "is_leaf": true
+  }
+}

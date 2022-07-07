@@ -1,7 +1,5 @@
 <?php
 
-namespace Hexlet\Code\GenDiff\Test;
-
 use PHPUnit\Framework\TestCase;
 
 $autoloadPath1 = __DIR__ . '/../../../autoload.php';
@@ -15,21 +13,60 @@ if (file_exists($autoloadPath1)) {
 
 class GenDiffJsonTest extends TestCase
 {
-    private string $validJsonFile1;
-    private string $validJsonFile2;
-    private string $emptyFile;
-    private string $validJsonFileAbsolut;
-    private string $invalidJsonFile;
-    private string $expectedResult;
-
-    public function setUp(): void
+    public function testOnlyFirstJsonValue()
     {
-        $this->validJsonFile1 = __DIR__ . "/mock/file1.json";
-        $this->validJsonFile2 = __DIR__ . "/mock/file2.json";
-        $this->emptyFile = __DIR__ . "/mock/empty.json";
-        $this->validJsonFileAbsolut = "tests/mock/file2.json";
-        $this->invalidJsonFile = __DIR__ . "/mock/invalid.json";
-        $this->expectedResult = <<<DOC
+        $expected = <<<DOC
+{
+  - key1: {
+        key: value
+    }
+    key2: value2
+}
+DOC;
+        $firstFile = __DIR__ . '/mock/onlyFirstJsonValue1.json';
+        $secondFile = __DIR__ . '/mock/onlyFirstJsonValue2.json';
+        $this->assertEquals($expected, genDiff($firstFile, $secondFile));
+    }
+
+    public function testBothJsonArrayValue()
+    {
+        $expected = <<<DOC
+{
+    doesnt: matter
+    key: {
+      - first: one
+      + first: 1
+        second: two
+      - zero: zero
+    }
+}
+DOC;
+        $firstFile = __DIR__ . '/mock/bothJsonArrayValue1.json';
+        $secondFile = __DIR__ . '/mock/bothJsonArrayValue2.json';
+        $this->assertEquals($expected, genDiff($firstFile, $secondFile));
+    }
+
+    public function testFirstJsonArraySecondNot()
+    {
+        $expected = <<<DOC
+{
+    doesnt: matter
+  - key: {
+        first: one
+        second: two
+        zero: zero
+    }
+  + key: value
+}
+DOC;
+        $firstFile = __DIR__ . '/mock/firstArrayJsonSecondNot1.json';
+        $secondFile = __DIR__ . '/mock/firstArrayJsonSecondNot2.json';
+        $this->assertEquals($expected, genDiff($firstFile, $secondFile));
+    }
+
+    public function testTwoFlatJsons()
+    {
+        $expected = <<<DOC
 {
   - follow: false
     host: hexlet.io
@@ -39,46 +76,85 @@ class GenDiffJsonTest extends TestCase
   + verbose: true
 }
 DOC;
+        $firstFile = __DIR__ . '/mock/file1.json';
+        $secondFile = __DIR__ . '/mock/file2.json';
+        $this->assertEquals($expected, genDiff($firstFile, $secondFile));
     }
 
-    public function testTwoValidJson()
-    {
-        $this->assertEquals($this->expectedResult, genDiff($this->validJsonFile1, $this->validJsonFile2));
-    }
-
-    public function testTwoJsonRelativePath()
-    {
-        $this->assertEquals($this->expectedResult, genDiff($this->validJsonFile1, $this->validJsonFileAbsolut));
-    }
-
-    public function testEmptyJsonFirst()
+    public function testEmptyFile()
     {
         $expected = <<<DOC
 {
-  + host: hexlet.io
-  + timeout: 20
-  + verbose: true
 }
 DOC;
-        $this->assertEquals($expected, genDiff($this->emptyFile, $this->validJsonFile2));
+        $emptyFile = __DIR__ . '/mock/empty.json';
+        $this->assertEquals($expected, genDiff($emptyFile, $emptyFile));
     }
 
-    public function testEmptyJsonSecond()
+    public function testJsonArrayStructureLikeDiff()
     {
         $expected = <<<DOC
 {
-  - follow: false
-  - host: hexlet.io
-  - proxy: 123.234.53.22
-  - timeout: 50
+    doesnt: matter
+    key: {
+        is_leaf: true
+        new_value: value2
+        old_value: value1
+    }
 }
 DOC;
-        $this->assertEquals($expected, genDiff($this->validJsonFile1, $this->emptyFile));
+        $fileWithDiffStructure = __DIR__ . '/mock/JsonArrayStructureLikeDiff.json';
+        $this->assertEquals($expected, genDiff($fileWithDiffStructure, $fileWithDiffStructure));
     }
 
-    public function testInvalidJson()
+    public function testTwoValidJsons()
     {
-        $this->expectError();
-        genDiff($this->validJsonFile1, $this->invalidJsonFile);
+        $expected = <<<DOC
+{
+    common: {
+      + follow: false
+        setting1: Value 1
+      - setting2: 200
+      - setting3: true
+      + setting3: null
+      + setting4: blah blah
+      + setting5: {
+            key5: value5
+        }
+        setting6: {
+            doge: {
+              - wow:
+              + wow: so much
+            }
+            key: value
+          + ops: vops
+        }
+    }
+    group1: {
+      - baz: bas
+      + baz: bars
+        foo: bar
+      - nest: {
+            key: value
+        }
+      + nest: str
+    }
+  - group2: {
+        abc: 12345
+        deep: {
+            id: 45
+        }
+    }
+  + group3: {
+        deep: {
+            id: {
+                number: 45
+            }
+        }
+        fee: 100500
+    }
+}
+DOC;
+        $this->assertEquals($expected, genDiff(__DIR__ . "/mock/nonflat1.json", __DIR__ . "/mock/nonflat2.json"));
     }
 }

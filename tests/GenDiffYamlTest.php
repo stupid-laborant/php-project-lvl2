@@ -2,62 +2,67 @@
 
 use PHPUnit\Framework\TestCase;
 
-require_once __DIR__ . '/../vendor/autoload.php';
+$autoloadPath1 = __DIR__ . '/../../../autoload.php';
+$autoloadPath2 = __DIR__ . '/../vendor/autoload.php';
 
-
+if (file_exists($autoloadPath1)) {
+    require_once $autoloadPath1;
+} else {
+    require_once $autoloadPath2;
+}
 
 class GenDiffYamlTest extends TestCase
 {
-
-    private string $validYamlFile1;
-    private string $validYamlFile2;
-    private string $emptyYamlFile;
-    private string $expectedResult;
-
-    public function setUp(): void
-    {
-        $this->validYamlFile1 = __DIR__ . "/mock/file1.yml";
-        $this->validYamlFile2 = __DIR__ . "/mock/file2.yml";
-        $this->emptyYamlFile = __DIR__ . "/mock/empty.yml";
-        $this->expectedResult = <<<DOC
-{
-  - follow: false
-    host: hexlet.io
-  - proxy: 123.234.53.22
-  - timeout: 50
-  + timeout: 20
-  + verbose: true
-}
-DOC;
-    }
-
-    public function testTwoValidYaml()
-    {
-        $this->assertEquals($this->expectedResult, genDiff($this->validYamlFile1, $this->validYamlFile2));
-    }
-
-    public function testEmptyYamlFirst()
+    public function testTwoValidYml()
     {
         $expected = <<<DOC
 {
-  + host: hexlet.io
-  + timeout: 20
-  + verbose: true
-}
-DOC;
-        $this->assertEquals($expected, genDiff($this->emptyYamlFile, $this->validYamlFile2));
+    common: {
+      + follow: false
+        setting1: Value 1
+      - setting2: 200
+      - setting3: true
+      + setting3: null
+      + setting4: blah blah
+      + setting5: {
+            key5: value5
+        }
+        setting6: {
+            doge: {
+              - wow:
+              + wow: so much
+            }
+            key: value
+          + ops: vops
+        }
     }
-
-    public function testEmptyYamlLast()
-    {
-        $expected = <<<DOC
-{
-  - follow: false
-  - host: hexlet.io
-  - proxy: 123.234.53.22
-  - timeout: 50
+    group1: {
+      - baz: bas
+      + baz: bars
+        foo: bar
+      - nest: {
+            key: value
+        }
+      + nest: str
+    }
+  - group2: {
+        abc: 12345
+        deep: {
+            id: 45
+        }
+    }
+  + group3: {
+        deep: {
+            id: {
+                number: 45
+            }
+        }
+        fee: 100500
+    }
 }
 DOC;
-        $this->assertEquals($expected, genDiff($this->validYamlFile1, $this->emptyYamlFile));
+        $firstYml = __DIR__ . "/mock/nonflat1.yml";
+        $secondYml = __DIR__ . "/mock/nonflat2.yml";
+        $this->assertEquals($expected, genDiff($firstYml, $secondYml));
     }
 }

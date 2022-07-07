@@ -16,7 +16,7 @@ function parse(string $filePath)
             break;
         case "yml":
         case "yaml":
-            $fileContent = (array)Yaml::parse(file_get_contents(realpath($filePath)), Yaml::PARSE_OBJECT_FOR_MAP);
+            $fileContent = Yaml::parse(file_get_contents(realpath($filePath)));
             break;
         default:
             throw new \Exception("Unknown file format");

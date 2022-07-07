@@ -12,7 +12,8 @@
         },
         "files": [
             "src/GenDiff.php",
-            "src/Parsers/Parser.php"
+            "src/Parsers/Parser.php",
+            "src/Formatters/StylishFormetter.php"
         ]
     },
     "authors": [

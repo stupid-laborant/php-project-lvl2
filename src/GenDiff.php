@@ -1,42 +1,63 @@
 <?php
 
+use function Formatter\StylishFormat\format as stylishFormat;
 use function Parser\parse;
 
-const NEW_LINE_PREFIX = "  + ";
-const DEL_LINE_PREFIX = "  - ";
-const UNCH_LINE_PREFIX = "    ";
-
-function genDiff(string $pathToFile1, string $pathToFile2): string
+function genDiff(string $pathToFile1, string $pathToFile2, string $format = 'stylish'): string
 {
     $firstJson = parse($pathToFile1);
     $secondJson = parse($pathToFile2);
-    ksort($firstJson);
-    ksort($secondJson);
-    $output = "{" . PHP_EOL;
-
-    $unmodified = array_intersect_assoc($firstJson, $secondJson);
-    $modified = array_diff_assoc(array_intersect_key($firstJson, $secondJson), $unmodified);
-    $added = array_diff_key($secondJson, $firstJson);
-    foreach ($firstJson as $key => $value) {
-        if (array_key_exists($key, $unmodified)) {
-            $output .= getProperString($key, $value, UNCH_LINE_PREFIX);
-        } else {
-            $output .= getProperString($key, $value, DEL_LINE_PREFIX);
-            if (array_key_exists($key, $modified)) {
-                $output .= getProperString($key, $secondJson[$key], NEW_LINE_PREFIX);
-            }
-        }
-    }
-
-    foreach ($added as $key => $value) {
-        $output .= getProperString($key, $value, NEW_LINE_PREFIX);
-    }
-
-    return $output . "}";
+    $jsonDifference = getJsonDifference($firstJson, $secondJson);
+    return getFormattedDifference($jsonDifference, $format);
 }
 
-function getProperString(string $key, $value, string $prefix = ""): string
+function getFormattedDifference(array $jsonDifference, string $format): string
 {
-    $output = is_bool($value) ? "{$prefix}{$key}: " . var_export($value, true) : "{$prefix}{$key}: {$value}";
-    return $output . PHP_EOL;
+    switch ($format) {
+        case 'stylish':
+        default:
+            return stylishFormat($jsonDifference);
+    }
+}
+
+function getJsonDifference(array $firstJson, array $secondJson): array
+{
+    $jsonDifference = [];
+    foreach ($firstJson as $key => $value) {
+        if (is_array($value)) {
+            ksort($value);
+        }
+        if (array_key_exists($key, $secondJson)) {
+            $newValue = $secondJson[$key];
+            if (is_array($newValue)) {
+                ksort($newValue);
+            }
+            if (is_array($value) && is_array($newValue)) {
+                $jsonDifference[$key] = [
+                    'value' => getJsonDifference($value, $newValue),
+                    'is_leaf' => false
+                ];
+            } else {
+                $jsonDifference[$key] = [
+                    'old_value' => $value,
+                    'new_value' => $newValue,
+                    'is_leaf' => true
+                ];
+            }
+        } else {
+            $jsonDifference[$key] = [
+                'old_value' => $value,
+                'is_leaf' => true
+            ];
+        }
+    }
+    $newElements = array_diff_key($secondJson, $firstJson);
+    foreach ($newElements as $key => $value) {
+        $jsonDifference[$key] = [
+            'new_value' => $value,
+            'is_leaf' => true
+        ];
+    }
+    ksort($jsonDifference);
+    return $jsonDifference;
 }
