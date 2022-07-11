@@ -1,7 +1,7 @@
 <?php
 
-use function Formatter\StylishFormat\format as stylishFormat;
 use function Parser\parse;
+use function Formatter\getFormatted;
 
 function genDiff(string $pathToFile1, string $pathToFile2, string $format = 'stylish'): string
 {
@@ -13,11 +13,7 @@ function genDiff(string $pathToFile1, string $pathToFile2, string $format = 'sty
 
 function getFormattedDifference(array $jsonDifference, string $format): string
 {
-    switch ($format) {
-        case 'stylish':
-        default:
-            return stylishFormat($jsonDifference);
-    }
+    return getFormatted($jsonDifference, $format);
 }
 
 function getJsonDifference(array $firstJson, array $secondJson): array
