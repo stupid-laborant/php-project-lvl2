@@ -11,7 +11,7 @@ if (file_exists($autoloadPath1)) {
     require_once $autoloadPath2;
 }
 
-class GenDiffJsonTest extends TestCase
+class GenDiffJsonStylishFormatterTest extends TestCase
 {
     public function testOnlyFirstJsonValue()
     {
@@ -32,7 +32,10 @@ DOC;
     {
         $expected = <<<DOC
 {
-    doesnt: matter
+    doesnt: {
+        matter: matter
+        mean: mean
+    }
     key: {
       - first: one
       + first: 1
@@ -97,9 +100,15 @@ DOC;
 {
     doesnt: matter
     key: {
-        is_leaf: true
         new_value: value2
         old_value: value1
+    }
+    key2: {
+        key3: {
+            children: {
+                key4: value3
+            }
+        }
     }
 }
 DOC;

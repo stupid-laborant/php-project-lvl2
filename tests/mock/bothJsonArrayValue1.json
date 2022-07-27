@@ -4,5 +4,8 @@
     "first": "one",
     "second": "two"
   },
-  "doesnt": "matter"
+  "doesnt": {
+    "matter": "matter",
+    "mean": "mean"
+  }
 }

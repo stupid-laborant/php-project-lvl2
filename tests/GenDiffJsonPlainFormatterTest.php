@@ -11,7 +11,7 @@ if (file_exists($autoloadPath1)) {
     require_once $autoloadPath2;
 }
 
-class GenDiffJsonPlainTest extends TestCase
+class GenDiffJsonPlainFormatterTest extends TestCase
 {
 
     public function testTwoValidJsons()
@@ -31,6 +31,16 @@ Property 'group3' was added with value: [complex value]
 DOC;
         $this->assertEquals($expected, genDiff(__DIR__ . "/mock/nonflat1.json", __DIR__ . "/mock/nonflat2.json", 'plain'));
 
+    }
+
+    public function testTwoSimpleJsons()
+    {
+        $expected = <<<DOC
+Property 'key.first' was updated. From 'one' to 1
+Property 'key.zero' was removed
+DOC;
+
+        $this->assertEquals($expected, genDiff(__DIR__ . "/mock/bothJsonArrayValue1.json", __DIR__ . "/mock/bothJsonArrayValue2.json", 'plain'));
     }
 
 }

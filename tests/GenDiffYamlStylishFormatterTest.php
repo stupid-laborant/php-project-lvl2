@@ -11,7 +11,7 @@ if (file_exists($autoloadPath1)) {
     require_once $autoloadPath2;
 }
 
-class GenDiffYamlTest extends TestCase
+class GenDiffYamlStylishFormatterTest extends TestCase
 {
     public function testTwoValidYml()
     {

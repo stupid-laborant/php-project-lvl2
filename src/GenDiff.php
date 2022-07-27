@@ -29,31 +29,43 @@ function getJsonDifference(array $firstJson, array $secondJson): array
                 ksort($newValue);
             }
             if (is_array($value) && is_array($newValue)) {
-                $jsonDifference[$key] = [
-                    'value' => getJsonDifference($value, $newValue),
-                    'is_leaf' => false
+                $jsonDifference[] = [
+                    'key' => $key,
+                    'children' => getJsonDifference($value, $newValue),
+                    'flag' => 'complex_value'
                 ];
             } else {
-                $jsonDifference[$key] = [
-                    'old_value' => $value,
-                    'new_value' => $newValue,
-                    'is_leaf' => true
-                ];
+                if ($value !== $newValue) {
+                    $jsonDifference[] = [
+                        'key' => $key,
+                        'old_value' => $value,
+                        'new_value' => $newValue,
+                        'flag' => 'updated'
+                    ];
+                } else {
+                    $jsonDifference[] = [
+                        'key' => $key,
+                        'value' => $value,
+                        'flag' => 'unchanged'
+                    ];
+                }
             }
         } else {
-            $jsonDifference[$key] = [
-                'old_value' => $value,
-                'is_leaf' => true
+            $jsonDifference[] = [
+                'key' => $key,
+                'value' => $value,
+                'flag' => 'removed'
             ];
         }
     }
     $newElements = array_diff_key($secondJson, $firstJson);
     foreach ($newElements as $key => $value) {
-        $jsonDifference[$key] = [
-            'new_value' => $value,
-            'is_leaf' => true
+        $jsonDifference[] = [
+            'key' => $key,
+            'value' => $value,
+            'flag' => 'added'
         ];
     }
-    ksort($jsonDifference);
+    usort($jsonDifference, fn($v1, $v2) => strcmp($v1['key'], $v2['key']));
     return $jsonDifference;
 }

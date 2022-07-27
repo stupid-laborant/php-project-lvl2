@@ -2,35 +2,33 @@
 
 namespace Formatter\PlainFormat;
 
+use function Formatter\AbstractFormatter\doFormat;
+
 const PREFIX = 'Property';
 
 function format(array $diff, array $keyPrefix = []): string
 {
-    $output = [];
-    foreach ($diff as $key => $value) {
-        $fullKeyName = $keyPrefix;
-        $fullKeyName[] = $key;
-        if (!$value['is_leaf']) {
-            $output[] = format($value['value'], $fullKeyName);
-        } else {
-            if (!array_key_exists('new_value', $value)) {
-                //only old
-                $output[] = getAddDeleteString($fullKeyName, $value['old_value'], 'removed');
-            } elseif (!array_key_exists('old_value', $value)) {
-                //only new
-                $output[] = getAddDeleteString($fullKeyName, $value['new_value'], 'added');
-            } else {
-                //both new & old
-                $new = $value['new_value'];
-                $old = $value['old_value'];
-                if ($new !== $old) {
-                    $output[] = getUpdateString($fullKeyName, $old, $new);
-                }
-            }
-        }
-    }
+    $fnComplex = function (array $value, array $keyPrefix): string {
+        $keyPrefix[] = $value['key'];
+        return format($value['children'], $keyPrefix);
+    };
+
+    $fnEdited = function (array $value, array $keyPrefix): string {
+        $keyPrefix[] = $value['key'];
+        $new = $value['new_value'];
+        $old = $value['old_value'];
+        return getUpdateString($keyPrefix, $old, $new);
+    };
+
+    $fnAddedDeleted = function (array $value, array $keyPrefix): string {
+        $keyPrefix[] = $value['key'];
+        return getAddDeleteString($keyPrefix, $value['value'], $value['flag']);
+    };
+    $diff = array_filter($diff, fn($e) => $e['flag'] != 'unchanged');
+    $output = doFormat($diff, $fnComplex, $fnEdited, $fnAddedDeleted, $fnAddedDeleted, fn($e) => $e, $keyPrefix);
     return implode(PHP_EOL, $output);
 }
+
 
 function getAddDeleteString(array $key, mixed $value, string $operation): string
 {

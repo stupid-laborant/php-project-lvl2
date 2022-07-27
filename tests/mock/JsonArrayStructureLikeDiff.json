@@ -2,7 +2,14 @@
   "doesnt": "matter",
   "key": {
     "new_value": "value2",
-    "old_value": "value1",
-    "is_leaf": true
+    "old_value": "value1"
+  },
+  "key2": {
+      "key3": {
+        "children": {
+          "key4": "value3"
+        }
+      }
   }
+
 }
