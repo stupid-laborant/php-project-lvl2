@@ -1,0 +1,14 @@
+{
+  "change": {
+    "flat": "simple",
+    "nested": {
+      "deleted": "old"
+    }
+  },
+  "delete_add": {
+    "ab": "bc",
+    "cd": {
+      "cd": "de"
+    }
+  }
+}

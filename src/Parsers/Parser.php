@@ -1,25 +1,27 @@
 <?php
 
-namespace Parser;
+namespace Differ\Parser;
 
 use Symfony\Component\Yaml\Yaml;
 
 function parse(string $filePath)
 {
-    $extension = substr($filePath, strripos($filePath, ".") + 1);
-    if (!str_starts_with($filePath, "/")) {
-        $filePath = "./" . $filePath;
+    $extension = pathinfo($filePath, PATHINFO_EXTENSION);
+    $realFilePath = str_starts_with($filePath, "/") ? realpath($filePath) : realpath("./{$filePath}");
+    if ($realFilePath === false) {
+        throw new \Exception($filePath . "path is invalid");
+    }
+    $fileContent = file_get_contents($realFilePath);
+    if ($fileContent === false) {
+        throw new \Exception("can't read file: {$realFilePath}");
     }
     switch ($extension) {
         case "json":
-            $fileContent = json_decode(file_get_contents(realpath($filePath)), true);
-            break;
+            return json_decode($fileContent, true);
         case "yml":
         case "yaml":
-            $fileContent = Yaml::parse(file_get_contents(realpath($filePath)));
-            break;
+            return Yaml::parse($fileContent);
         default:
             throw new \Exception("Unknown file format");
     }
-    return $fileContent;
 }

@@ -1,10 +1,10 @@
 <?php
 
-namespace Formatter;
+namespace Differ\Formatter;
 
-use function Formatter\StylishFormat\format as stylishFormat;
-use function Formatter\PlainFormat\format as plainFormat;
-use function Formatter\JsonFormatter\format as jsonFormat;
+use function Differ\Formatter\JsonFormatter\format as jsonFormat;
+use function Differ\Formatter\StylishFormat\format as stylishFormat;
+use function Differ\Formatter\PlainFormat\format as plainFormat;
 
 function getFormatted(array $array, string $format): string
 {

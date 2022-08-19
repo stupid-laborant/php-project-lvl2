@@ -1,7 +1,10 @@
 <?php
 
-use function Parser\parse;
-use function Formatter\getFormatted;
+namespace Differ\Differ;
+
+use function Differ\Parser\parse;
+use function Differ\Formatter\getFormatted;
+use function Functional\sort;
 
 function genDiff(string $pathToFile1, string $pathToFile2, string $format = 'stylish'): string
 {
@@ -18,54 +21,48 @@ function getFormattedDifference(array $jsonDifference, string $format): string
 
 function getJsonDifference(array $firstJson, array $secondJson): array
 {
-    $jsonDifference = [];
-    foreach ($firstJson as $key => $value) {
-        if (is_array($value)) {
-            ksort($value);
-        }
-        if (array_key_exists($key, $secondJson)) {
+    $firstJsonKeys = array_keys($firstJson);
+    $secondJsonKeys = array_keys($secondJson);
+    $uniqueKeys = array_unique(array_merge($firstJsonKeys, $secondJsonKeys));
+    $uniqueSortedKeys = sort($uniqueKeys, fn($s1, $s2) => strcmp($s1, $s2));
+    return array_map(function ($key) use ($firstJson, $secondJson) {
+        if (array_key_exists($key, $firstJson) && array_key_exists($key, $secondJson)) {
+            $oldValue = $firstJson[$key];
             $newValue = $secondJson[$key];
-            if (is_array($newValue)) {
-                ksort($newValue);
-            }
-            if (is_array($value) && is_array($newValue)) {
-                $jsonDifference[] = [
+            if (is_array($oldValue) && is_array($newValue)) {
+                return [
                     'key' => $key,
-                    'children' => getJsonDifference($value, $newValue),
+                    'children' => getJsonDifference($oldValue, $newValue),
                     'flag' => 'complex_value'
                 ];
             } else {
-                if ($value !== $newValue) {
-                    $jsonDifference[] = [
+                if ($oldValue !== $newValue) {
+                    return [
                         'key' => $key,
-                        'old_value' => $value,
+                        'old_value' => $oldValue,
                         'new_value' => $newValue,
                         'flag' => 'updated'
                     ];
                 } else {
-                    $jsonDifference[] = [
+                    return [
                         'key' => $key,
-                        'value' => $value,
+                        'value' => $oldValue,
                         'flag' => 'unchanged'
                     ];
                 }
             }
-        } else {
-            $jsonDifference[] = [
+        } elseif (array_key_exists($key, $firstJson)) {
+            return [
                 'key' => $key,
-                'value' => $value,
+                'value' => $firstJson[$key],
                 'flag' => 'removed'
             ];
+        } else {
+            return [
+                'key' => $key,
+                'value' => $secondJson[$key],
+                'flag' => 'added'
+            ];
         }
-    }
-    $newElements = array_diff_key($secondJson, $firstJson);
-    foreach ($newElements as $key => $value) {
-        $jsonDifference[] = [
-            'key' => $key,
-            'value' => $value,
-            'flag' => 'added'
-        ];
-    }
-    usort($jsonDifference, fn($v1, $v2) => strcmp($v1['key'], $v2['key']));
-    return $jsonDifference;
+    }, $uniqueSortedKeys);
 }

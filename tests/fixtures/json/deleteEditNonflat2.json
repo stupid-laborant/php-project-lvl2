@@ -1,0 +1,15 @@
+{
+  "change": {
+    "flat": {
+      "added": "new"
+    },
+    "nested": "none"
+  },
+  "delete_add": {
+    "de": "fg",
+    "fg": {
+      "hi": "ij",
+      "jk": "kl"
+    }
+  }
+}

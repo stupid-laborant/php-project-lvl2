@@ -1,50 +1,47 @@
 <?php
 
-namespace Formatter\PlainFormat;
+namespace Differ\Formatter\PlainFormat;
 
-use function Formatter\AbstractFormatter\doFormat;
+use function Differ\Formatter\AbstractFormatter\doFormat;
 
 const PREFIX = 'Property';
 
-function format(array $diff, array $keyPrefix = []): string
+function format(array $diff, string $keyPrefix = ""): string
 {
-    $fnComplex = function (array $value, array $keyPrefix): string {
-        $keyPrefix[] = $value['key'];
-        return format($value['children'], $keyPrefix);
+    $fnComplex = function (array $value, string $keyPrefix): string {
+        $NewKeyPrefix = $keyPrefix === "" ? $value['key'] : "{$keyPrefix}.{$value['key']}";
+        return format($value['children'], $NewKeyPrefix);
     };
 
-    $fnEdited = function (array $value, array $keyPrefix): string {
-        $keyPrefix[] = $value['key'];
+    $fnEdited = function (array $value, string $keyPrefix): string {
+        $NewKeyPrefix = $keyPrefix === "" ? $value['key'] : "{$keyPrefix}.{$value['key']}";
         $new = $value['new_value'];
         $old = $value['old_value'];
-        return getUpdateString($keyPrefix, $old, $new);
+        return getUpdateString($NewKeyPrefix, $old, $new);
     };
 
-    $fnAddedDeleted = function (array $value, array $keyPrefix): string {
-        $keyPrefix[] = $value['key'];
-        return getAddDeleteString($keyPrefix, $value['value'], $value['flag']);
+    $fnAddedDeleted = function (array $value, string $keyPrefix): string {
+        $NewKeyPrefix = $keyPrefix === "" ? $value['key'] : "{$keyPrefix}.{$value['key']}";
+        return getAddDeleteString($NewKeyPrefix, $value['value'], $value['flag']);
     };
-    $diff = array_filter($diff, fn($e) => $e['flag'] != 'unchanged');
-    $output = doFormat($diff, $fnComplex, $fnEdited, $fnAddedDeleted, $fnAddedDeleted, fn($e) => $e, $keyPrefix);
+    $onlyChanged = array_filter($diff, fn($e) => $e['flag'] != 'unchanged');
+    $output = doFormat($onlyChanged, $fnComplex, $fnEdited, $fnAddedDeleted, $fnAddedDeleted, fn($e) => $e, $keyPrefix);
     return implode(PHP_EOL, $output);
 }
 
 
-function getAddDeleteString(array $key, mixed $value, string $operation): string
+function getAddDeleteString(string $key, mixed $value, string $operation): string
 {
-    $fullKeyStringName = implode(".", $key);
-    $output = PREFIX . " '{$fullKeyStringName}' was " . $operation;
+    $output = PREFIX . " '{$key}' was " . $operation;
     if ($operation == 'added') {
-        $output .= " with value: " . prepareValue($value);
+        return $output . " with value: " . prepareValue($value);
     }
     return $output;
 }
 
-function getUpdateString(array $key, mixed $oldValue, mixed $newValue): string
+function getUpdateString(string $key, mixed $oldValue, mixed $newValue): string
 {
-    $nameWithPrefix = PREFIX . " '" . implode(".", $key);
-    $output = $nameWithPrefix . "' was updated. From " . prepareValue($oldValue) . " to " . prepareValue($newValue);
-    return  $output;
+    return  PREFIX . " '{$key}' was updated. From " . prepareValue($oldValue) . " to " . prepareValue($newValue);
 }
 
 function prepareValue(mixed $val)

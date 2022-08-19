@@ -1,8 +1,8 @@
 <?php
 
-namespace Formatter\StylishFormat;
+namespace Differ\Formatter\StylishFormat;
 
-use function Formatter\AbstractFormatter\doFormat;
+use function Differ\Formatter\AbstractFormatter\doFormat;
 
 const LEVEL_PADDING = "    ";
 const NEW_LINE_PREFIX = "  + ";
@@ -11,7 +11,6 @@ const DEL_LINE_PREFIX = "  - ";
 function format(array $diff, int $level = 0): string
 {
     $currentPadding = str_repeat(LEVEL_PADDING, $level);
-    $output = "{" . PHP_EOL;
 
     $fnComplex = function (array $value, int $level): string {
         return getProperString($value['key'], format($value['children'], $level + 1), $level + 1);
@@ -34,29 +33,27 @@ function format(array $diff, int $level = 0): string
     $fnUnchanged = function (array $value, int $level): string {
         return getProperString($value['key'], $value['value'], $level, LEVEL_PADDING);
     };
-    $output .= implode(doFormat($diff, $fnComplex, $fnEdited, $fnAdded, $fnDeleted, $fnUnchanged, $level));
-    return  $output . $currentPadding . '}';
+    $output = implode(doFormat($diff, $fnComplex, $fnEdited, $fnAdded, $fnDeleted, $fnUnchanged, $level));
+    return "{" . PHP_EOL . $output . $currentPadding . '}';
 }
 
-function getProperString(string $key, $value, int $level, string $prefix = ""): string
+function getProperString(string $key, mixed $value, int $level, string $prefix = ""): string
 {
     $padding = str_repeat(LEVEL_PADDING, $level);
-    $output = "{$padding}{$prefix}{$key}:";
     if (is_array($value)) {
-        ksort($value);
-        $output .= " {" . PHP_EOL;
-        foreach ($value as $subKey => $subValue) {
-            $output .= getProperString($subKey, $subValue, $level + 1, LEVEL_PADDING);
-        }
-        $output .=  $padding . LEVEL_PADDING . "}" . PHP_EOL;
+        $output = array_map(
+            fn($k, $v) => getProperString($k, $v, $level + 1, LEVEL_PADDING),
+            array_keys($value),
+            array_values($value)
+        );
+        return "{$padding}{$prefix}{$key}: " .
+            "{" . PHP_EOL .
+            implode($output) .
+            $padding . LEVEL_PADDING . "}" . PHP_EOL;
     } else {
         $preparedValue = prepareValue($value);
-        if (!empty($preparedValue)) {
-            $output .= " {$preparedValue}";
-        }
-        $output .= PHP_EOL;
+        return "{$padding}{$prefix}{$key}: {$preparedValue}" . PHP_EOL;
     }
-    return $output;
 }
 
 function prepareValue(mixed $val)
