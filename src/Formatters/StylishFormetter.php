@@ -2,8 +2,6 @@
 
 namespace Differ\Formatter\StylishFormat;
 
-use function Differ\Formatter\AbstractFormatter\doFormat;
-
 const LEVEL_PADDING = "    ";
 const NEW_LINE_PREFIX = "  + ";
 const DEL_LINE_PREFIX = "  - ";
@@ -33,7 +31,23 @@ function format(array $diff, int $level = 0): string
     $fnUnchanged = function (array $value, int $level): string {
         return getProperString($value['key'], $value['value'], $level, LEVEL_PADDING);
     };
-    $output = implode(doFormat($diff, $fnComplex, $fnEdited, $fnAdded, $fnDeleted, $fnUnchanged, $level));
+    $fnFormat = function ($value) use ($fnComplex, $fnEdited, $fnAdded, $fnDeleted, $fnUnchanged, $level) {
+        switch ($value['flag']) {
+            case 'complex_value':
+                return $fnComplex($value, $level);
+            case 'updated':
+                return $fnEdited($value, $level);
+            case 'added':
+                return $fnAdded($value, $level);
+            case 'removed':
+                return $fnDeleted($value, $level);
+            case 'unchanged':
+                return $fnUnchanged($value, $level);
+            default:
+                throw new \Exception("wrong type of the value");
+        }
+    };
+    $output = implode(array_map($fnFormat, $diff));
     return "{" . PHP_EOL . $output . $currentPadding . '}';
 }
 

@@ -1,6 +1,0 @@
-Property 'change.flat' was updated. From 'simple' to [complex value]
-Property 'change.nested' was updated. From [complex value] to 'none'
-Property 'delete_add.ab' was removed
-Property 'delete_add.cd' was removed
-Property 'delete_add.de' was added with value: 'fg'
-Property 'delete_add.fg' was added with value: [complex value]

@@ -2,16 +2,33 @@
 
 namespace Differ\Differ;
 
-use function Differ\Parser\parse;
+use function Differ\Parsers\parse;
 use function Differ\Formatter\getFormatted;
 use function Functional\sort;
 
 function genDiff(string $pathToFile1, string $pathToFile2, string $format = 'stylish'): string
 {
-    $firstJson = parse($pathToFile1);
-    $secondJson = parse($pathToFile2);
+    $extensionFile1 = pathinfo($pathToFile1, PATHINFO_EXTENSION);
+    $extensionFile2 = pathinfo($pathToFile2, PATHINFO_EXTENSION);
+    $contentFile1 = getFileContent($pathToFile1);
+    $contentFile2 = getFileContent($pathToFile2);
+    $firstJson = parse($contentFile1, $extensionFile1);
+    $secondJson = parse($contentFile2, $extensionFile2);
     $jsonDifference = getJsonDifference($firstJson, $secondJson);
     return getFormattedDifference($jsonDifference, $format);
+}
+
+function getFileContent(string $filePath): string
+{
+    $realFilePath = str_starts_with($filePath, "/") ? realpath($filePath) : realpath("./{$filePath}");
+    if ($realFilePath === false) {
+        throw new \Exception($filePath . "path is invalid");
+    }
+    $fileContent = file_get_contents($realFilePath);
+    if ($fileContent === false) {
+        throw new \Exception("can't read file: {$realFilePath}");
+    }
+    return $fileContent;
 }
 
 function getFormattedDifference(array $jsonDifference, string $format): string

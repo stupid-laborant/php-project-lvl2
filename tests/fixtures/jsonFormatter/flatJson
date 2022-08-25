@@ -1,1 +1,0 @@
-[{"key":"follow","value":false,"flag":"removed"},{"key":"host","value":"hexlet.io","flag":"unchanged"},{"key":"proxy","value":"123.234.53.22","flag":"removed"},{"key":"timeout","old_value":50,"new_value":20,"flag":"updated"},{"key":"verbose","value":true,"flag":"added"}]

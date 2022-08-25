@@ -2,15 +2,13 @@
 
 namespace Differ\Formatter\PlainFormat;
 
-use function Differ\Formatter\AbstractFormatter\doFormat;
-
 const PREFIX = 'Property';
 
 function format(array $diff, string $keyPrefix = ""): string
 {
     $fnComplex = function (array $value, string $keyPrefix): string {
-        $NewKeyPrefix = $keyPrefix === "" ? $value['key'] : "{$keyPrefix}.{$value['key']}";
-        return format($value['children'], $NewKeyPrefix);
+        $newKeyPrefix = $keyPrefix === "" ? $value['key'] : "{$keyPrefix}.{$value['key']}";
+        return format($value['children'], $newKeyPrefix);
     };
 
     $fnEdited = function (array $value, string $keyPrefix): string {
@@ -24,9 +22,22 @@ function format(array $diff, string $keyPrefix = ""): string
         $NewKeyPrefix = $keyPrefix === "" ? $value['key'] : "{$keyPrefix}.{$value['key']}";
         return getAddDeleteString($NewKeyPrefix, $value['value'], $value['flag']);
     };
+
+    $fnFormat = function ($value) use ($fnComplex, $fnEdited, $fnAddedDeleted, $keyPrefix) {
+        switch ($value['flag']) {
+            case 'complex_value':
+                return $fnComplex($value, $keyPrefix);
+            case 'updated':
+                return $fnEdited($value, $keyPrefix);
+            case 'added':
+            case 'removed':
+                return $fnAddedDeleted($value, $keyPrefix);
+            default:
+                throw new \Exception("wrong type of the value");
+        }
+    };
     $onlyChanged = array_filter($diff, fn($e) => $e['flag'] != 'unchanged');
-    $output = doFormat($onlyChanged, $fnComplex, $fnEdited, $fnAddedDeleted, $fnAddedDeleted, fn($e) => $e, $keyPrefix);
-    return implode(PHP_EOL, $output);
+    return implode(PHP_EOL, array_map($fnFormat, $onlyChanged));
 }
 
 
