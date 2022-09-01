@@ -13,52 +13,57 @@ class GenDiffTest extends TestCase
         return [
             [
                 $this->getFullPath("/fixtures/json/nonflat1.json"),
-                $this->getFullPath("/fixtures/json/nonflat2.json"),
-                file_get_contents($this->getFullPath("/fixtures/diff.stylish")),
-                "stylish"
-            ],
-            [
-                $this->getFullPath("/fixtures/json/nonflat1.json"),
-                $this->getFullPath("/fixtures/json/nonflat2.json"),
-                file_get_contents($this->getFullPath("/fixtures/diff.plain")),
-                "plain"
-            ],
-            [
-                $this->getFullPath("/fixtures/json/nonflat1.json"),
-                $this->getFullPath("/fixtures/json/nonflat2.json"),
-                file_get_contents($this->getFullPath("/fixtures/diff.json")),
-                "json"
+                $this->getFullPath("/fixtures/json/nonflat2.json")
             ],
             [
                 $this->getFullPath("/fixtures/yml/nonflat1.yml"),
                 $this->getFullPath("/fixtures/yml/nonflat2.yml"),
-                file_get_contents($this->getFullPath("/fixtures/diff.stylish")),
-                "stylish"
-            ],
-            [
-                $this->getFullPath("/fixtures/yml/nonflat1.yml"),
-                $this->getFullPath("/fixtures/yml/nonflat2.yml"),
-                file_get_contents($this->getFullPath("/fixtures/diff.plain")),
-                "plain"
-            ],
-            [
-                $this->getFullPath("/fixtures/yml/nonflat1.yml"),
-                $this->getFullPath("/fixtures/yml/nonflat2.yml"),
-                file_get_contents($this->getFullPath("/fixtures/diff.json")),
-                "json"
-            ],
+
+            ]
         ];
     }
     private function getFullPath(string $path): string
     {
         return __DIR__ . $path;
     }
-
     /**
      * @dataProvider dataProviderGenDiff
      */
-    public function testGenDiff($file1, $file2, $expected, $formatter)
+    public function testGenDiffDefault($file1, $file2,)
     {
-        $this->assertEquals($expected, genDiff($file1, $file2, $formatter));
+        $this->assertEquals(
+            file_get_contents($this->getFullPath("/fixtures/diff.stylish")),
+            genDiff($file1, $file2)
+        );
+    }
+    /**
+     * @dataProvider dataProviderGenDiff
+     */
+    public function testGenDiffStylish($file1, $file2,)
+    {
+        $this->assertEquals(
+            file_get_contents($this->getFullPath("/fixtures/diff.stylish")),
+            genDiff($file1, $file2, 'stylish')
+        );
+    }
+    /**
+     * @dataProvider dataProviderGenDiff
+     */
+    public function testGenDiffPlain($file1, $file2,)
+    {
+        $this->assertEquals(
+            file_get_contents($this->getFullPath("/fixtures/diff.plain")),
+            genDiff($file1, $file2, 'plain')
+        );
+    }
+    /**
+     * @dataProvider dataProviderGenDiff
+     */
+    public function testGenDiffJson($file1, $file2,)
+    {
+        $this->assertEquals(
+            file_get_contents($this->getFullPath("/fixtures/diff.json")),
+            genDiff($file1, $file2, 'json')
+        );
     }
 }
